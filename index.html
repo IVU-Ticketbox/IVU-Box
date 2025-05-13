@@ -12,8 +12,8 @@
     }
     header {
       text-align: center;
-      padding: 1rem;
-      font-size: 1.2rem;
+      padding: 2rem;
+      font-size: 1.5rem;
     }
     .bottom-nav {
       position: fixed;
@@ -28,15 +28,17 @@
       border: none;
       font-size: 1rem;
       color: white;
+      background-color: gray;
     }
     .bottom-nav .active {
       background-color: #3399ff;
     }
-    .bottom-nav .middle {
-      background-color: gray;
-    }
     .screen {
       padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 6rem);
     }
     .keypad {
       display: grid;
@@ -58,67 +60,53 @@
     .keypad .cancel {
       background-color: #e74c3c;
     }
-    .line-info {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem;
-      border-top: 1px solid white;
-    }
-    .sidebar {
-      position: absolute;
-      top: 0;
-      bottom: 3rem;
-      left: 0;
-      width: 120px;
-      background-color: #002244;
-      padding: 0.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .sidebar button {
-      background-color: #004477;
-      color: white;
-      border: none;
-      padding: 0.5rem;
-      border-radius: 5px;
-      font-size: 0.8rem;
-    }
-    .main-content {
-      margin-left: 130px;
-      padding: 1rem;
-    }
-    .haltestelle {
-      display: flex;
-      align-items: center;
-      margin: 0.5rem 0;
-    }
-    .haltestelle::before {
-      content: '⛶';
-      margin-right: 0.5rem;
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <header>Bitte ITCS anmelden</header>  <div class="screen">
-    <div class="keypad">
-      <button>1</button>
-      <button>2</button>
-      <button>3</button>
-      <button>4</button>
-      <button>5</button>
-      <button>6</button>
-      <button>7</button>
-      <button>8</button>
-      <button>9</button>
-      <button class="cancel">X</button>
-      <button>0</button>
-      <button class="confirm">✓</button>
+  <header id="header-text">Bitte ITCS anmelden</header>  <div class="screen">
+    <div id="keypad-container" class="keypad hidden">
+      <button onclick="inputDigit('1')">1</button>
+      <button onclick="inputDigit('2')">2</button>
+      <button onclick="inputDigit('3')">3</button>
+      <button onclick="inputDigit('4')">4</button>
+      <button onclick="inputDigit('5')">5</button>
+      <button onclick="inputDigit('6')">6</button>
+      <button onclick="inputDigit('7')">7</button>
+      <button onclick="inputDigit('8')">8</button>
+      <button onclick="inputDigit('9')">9</button>
+      <button class="cancel" onclick="clearInput()">X</button>
+      <button onclick="inputDigit('0')">0</button>
+      <button class="confirm" onclick="submitInput()">✓</button>
     </div>
   </div>  <div class="bottom-nav">
-    <button class="active">ITCS</button>
+    <button id="btn-itcs" onclick="showKeypad(this)" class="">ITCS</button>
     <button class="middle">Verkauf</button>
-    <button>Werkstattfahrt</button>
-  </div>
-</body>
+    <button id="btn-werkstatt">Werkstattfahrt</button>
+  </div>  <script>
+    const header = document.getElementById('header-text');
+    const keypad = document.getElementById('keypad-container');
+    const btnItcs = document.getElementById('btn-itcs');
+    const btnWerkstatt = document.getElementById('btn-werkstatt');
+
+    function showKeypad(button) {
+      header.textContent = "Verkäufernummer eingeben";
+      keypad.classList.remove('hidden');
+      btnItcs.classList.add('active');
+    }
+
+    function inputDigit(digit) {
+      console.log("Eingegeben:", digit); // später für Eingabefeld
+    }
+
+    function clearInput() {
+      console.log("Eingabe gelöscht");
+    }
+
+    function submitInput() {
+      console.log("Eingabe bestätigt");
+    }
+  </script></body>
 </html>
