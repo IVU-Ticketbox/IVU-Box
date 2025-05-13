@@ -1,131 +1,124 @@
 <!DOCTYPE html><html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ticketbox Simulator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticketbox</title>
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
-      background-color: #0a2740;
+      font-family: Arial, sans-serif;
+      background-color: #001f3f;
       color: white;
     }
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+    header {
       text-align: center;
+      padding: 1rem;
+      font-size: 1.2rem;
     }
-    button {
-      background-color: #007bff;
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background-color: #001730;
+    }
+    .bottom-nav button {
+      flex: 1;
+      padding: 1rem;
       border: none;
-      padding: 15px 30px;
+      font-size: 1rem;
       color: white;
-      font-size: 1.2em;
-      margin-top: 20px;
-      border-radius: 5px;
+    }
+    .bottom-nav .active {
+      background-color: #3399ff;
+    }
+    .bottom-nav .middle {
+      background-color: gray;
     }
     .screen {
-      display: none;
-      flex-direction: column;
-      gap: 10px;
+      padding: 2rem;
     }
-    .visible {
-      display: flex;
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
     }
-    .input-field {
-      background-color: #1a3a5a;
+    .keypad button {
+      background-color: #3399ff;
       border: none;
-      padding: 10px;
+      padding: 1.5rem;
+      font-size: 1.5rem;
       color: white;
-      font-size: 1em;
-      text-align: center;
-      width: 80%;
+      border-radius: 10px;
     }
-    .status-bar {
-      width: 100%;
-      background-color: #122f4a;
-      padding: 10px;
+    .keypad .confirm {
+      background-color: #2ecc71;
+    }
+    .keypad .cancel {
+      background-color: #e74c3c;
+    }
+    .line-info {
       display: flex;
       justify-content: space-between;
+      padding: 1rem;
+      border-top: 1px solid white;
     }
-    .haltestellen {
-      text-align: left;
-      background-color: #1a3a5a;
-      padding: 10px;
-      width: 90%;
-      margin-top: 20px;
-    }
-    .menu {
+    .sidebar {
+      position: absolute;
+      top: 0;
+      bottom: 3rem;
+      left: 0;
+      width: 120px;
+      background-color: #002244;
+      padding: 0.5rem;
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    .menu button {
-      flex: 1;
-      background-color: #444;
-      font-size: 0.8em;
+    .sidebar button {
+      background-color: #004477;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
+    }
+    .main-content {
+      margin-left: 130px;
+      padding: 1rem;
+    }
+    .haltestelle {
+      display: flex;
+      align-items: center;
+      margin: 0.5rem 0;
+    }
+    .haltestelle::before {
+      content: '⛶';
+      margin-right: 0.5rem;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="start-screen">
-    <h1>Ticketbox</h1>
-    <button onclick="goToLogin()">Anmelden</button>
-  </div>  <div class="container screen" id="login-screen">
-    <input class="input-field" id="verkNummer" placeholder="Verkäufernummer">
-    <input class="input-field" id="pin" placeholder="PIN" type="password">
-    <input class="input-field" id="linie" placeholder="Liniencode">
-    <input class="input-field" id="route" placeholder="Routencode">
-    <button onclick="goToMain()">Bestätigen</button>
-  </div>  <div class="container screen" id="main-screen">
-    <div class="status-bar">
-      <span id="lineInfo"></span>
-      <span id="dateTime"></span>
+  <header>Bitte ITCS anmelden</header>  <div class="screen">
+    <div class="keypad">
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="cancel">X</button>
+      <button>0</button>
+      <button class="confirm">✓</button>
     </div>
-    <div class="menu">
-      <button>Navi</button>
-      <button>Sprechwunsch</button>
-      <button>System</button>
-    </div>
-    <div class="haltestellen" id="haltestellen">
-      <!-- Haltestellenliste -->
-    </div>
-  </div>  <script>
-    function goToLogin() {
-      document.getElementById('start-screen').classList.remove('visible');
-      document.getElementById('start-screen').style.display = 'none';
-      document.getElementById('login-screen').classList.add('visible');
-    }
-
-    function goToMain() {
-      const linie = document.getElementById('linie').value;
-      const route = document.getElementById('route').value;
-
-      document.getElementById('lineInfo').innerText = `Linie ${linie} – Route ${route}`;
-      document.getElementById('dateTime').innerText = new Date().toLocaleString();
-
-      const haltestellen = [
-        'Olbersdorf, Aussichtspunkt',
-        'Olbersdorf, Poststraße',
-        'Olbersdorf, Niederviebig',
-        'Zittau, Vorstadt Bahnhof',
-        'Olbersdorf, Bärschstraße',
-        'Olbersdorfer See, Wohngebiet',
-        'Olbersdorfer See, Haus am See'
-      ];
-
-      document.getElementById('haltestellen').innerHTML = haltestellen.map(h => `• ${h}`).join('<br>');
-
-      document.getElementById('login-screen').classList.remove('visible');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('main-screen').classList.add('visible');
-    }
-
-    window.onload = () => {
-      document.getElementById('start-screen').classList.add('visible');
-    }
-  </script></body>
+  </div>  <div class="bottom-nav">
+    <button class="active">ITCS</button>
+    <button class="middle">Verkauf</button>
+    <button>Werkstattfahrt</button>
+  </div>
+</body>
 </html>
