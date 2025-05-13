@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticketbox Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #0a2740;
+      color: white;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    button {
+      background-color: #007bff;
+      border: none;
+      padding: 15px 30px;
+      color: white;
+      font-size: 1.2em;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .visible {
+      display: flex;
+    }
+    .input-field {
+      background-color: #1a3a5a;
+      border: none;
+      padding: 10px;
+      color: white;
+      font-size: 1em;
+      text-align: center;
+      width: 80%;
+    }
+    .status-bar {
+      width: 100%;
+      background-color: #122f4a;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .haltestellen {
+      text-align: left;
+      background-color: #1a3a5a;
+      padding: 10px;
+      width: 90%;
+      margin-top: 20px;
+    }
+    .menu {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .menu button {
+      flex: 1;
+      background-color: #444;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="start-screen">
+    <h1>Ticketbox</h1>
+    <button onclick="goToLogin()">Anmelden</button>
+  </div>  <div class="container screen" id="login-screen">
+    <input class="input-field" id="verkNummer" placeholder="Verkäufernummer">
+    <input class="input-field" id="pin" placeholder="PIN" type="password">
+    <input class="input-field" id="linie" placeholder="Liniencode">
+    <input class="input-field" id="route" placeholder="Routencode">
+    <button onclick="goToMain()">Bestätigen</button>
+  </div>  <div class="container screen" id="main-screen">
+    <div class="status-bar">
+      <span id="lineInfo"></span>
+      <span id="dateTime"></span>
+    </div>
+    <div class="menu">
+      <button>Navi</button>
+      <button>Sprechwunsch</button>
+      <button>System</button>
+    </div>
+    <div class="haltestellen" id="haltestellen">
+      <!-- Haltestellenliste -->
+    </div>
+  </div>  <script>
+    function goToLogin() {
+      document.getElementById('start-screen').classList.remove('visible');
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('login-screen').classList.add('visible');
+    }
+
+    function goToMain() {
+      const linie = document.getElementById('linie').value;
+      const route = document.getElementById('route').value;
+
+      document.getElementById('lineInfo').innerText = `Linie ${linie} – Route ${route}`;
+      document.getElementById('dateTime').innerText = new Date().toLocaleString();
+
+      const haltestellen = [
+        'Olbersdorf, Aussichtspunkt',
+        'Olbersdorf, Poststraße',
+        'Olbersdorf, Niederviebig',
+        'Zittau, Vorstadt Bahnhof',
+        'Olbersdorf, Bärschstraße',
+        'Olbersdorfer See, Wohngebiet',
+        'Olbersdorfer See, Haus am See'
+      ];
+
+      document.getElementById('haltestellen').innerHTML = haltestellen.map(h => `• ${h}`).join('<br>');
+
+      document.getElementById('login-screen').classList.remove('visible');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-screen').classList.add('visible');
+    }
+
+    window.onload = () => {
+      document.getElementById('start-screen').classList.add('visible');
+    }
+  </script></body>
+</html>
