@@ -10,9 +10,11 @@
       background-color: #001f3f;
       color: white;
     }
-    header {
-      text-align: center;
-      padding: 2rem;
+    .center-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 60vh;
       font-size: 1.5rem;
     }
     .bottom-nav {
@@ -21,6 +23,7 @@
       width: 100%;
       display: flex;
       background-color: #001730;
+      border-top: 1px solid white;
     }
     .bottom-nav button {
       flex: 1;
@@ -80,37 +83,52 @@
   </style>
 </head>
 <body>
-  <header id="header-text">Bitte ITCS anmelden</header>  <div class="screen">
-    <div id="keypad-container" class="hidden">
-      <div id="input-display" class="input-display"></div>
-      <div class="keypad">
-        <button onclick="inputDigit('1')">1</button>
-        <button onclick="inputDigit('2')">2</button>
-        <button onclick="inputDigit('3')">3</button>
-        <button onclick="inputDigit('4')">4</button>
-        <button onclick="inputDigit('5')">5</button>
-        <button onclick="inputDigit('6')">6</button>
-        <button onclick="inputDigit('7')">7</button>
-        <button onclick="inputDigit('8')">8</button>
-        <button onclick="inputDigit('9')">9</button>
-        <button class="cancel" onclick="clearInput()">X</button>
-        <button onclick="inputDigit('0')">0</button>
-        <button class="confirm" onclick="submitInput()">✓</button>
-      </div>
+  <div id="start-screen" class="center-header">Bitte ITCS anmelden</div>  <div id="main-screen" class="screen hidden">
+    <div id="input-display" class="input-display"></div>
+    <div class="keypad">
+      <button onclick="inputDigit('1')">1</button>
+      <button onclick="inputDigit('2')">2</button>
+      <button onclick="inputDigit('3')">3</button>
+      <button onclick="inputDigit('4')">4</button>
+      <button onclick="inputDigit('5')">5</button>
+      <button onclick="inputDigit('6')">6</button>
+      <button onclick="inputDigit('7')">7</button>
+      <button onclick="inputDigit('8')">8</button>
+      <button onclick="inputDigit('9')">9</button>
+      <button class="cancel" onclick="clearInput()">X</button>
+      <button onclick="inputDigit('0')">0</button>
+      <button class="confirm" onclick="submitInput()">✓</button>
     </div>
   </div>  <div class="bottom-nav">
-    <button id="btn-itcs" onclick="showKeypad()">ITCS</button>
+    <button id="btn-itcs" onclick="startLogin()">ITCS</button>
     <button class="middle">Verkauf</button>
     <button id="btn-werkstatt">Werkstattfahrt</button>
   </div>  <script>
-    const header = document.getElementById('header-text');
-    const keypadContainer = document.getElementById('keypad-container');
+    const startScreen = document.getElementById('start-screen');
+    const mainScreen = document.getElementById('main-screen');
     const inputDisplay = document.getElementById('input-display');
-    let currentInput = "";
 
-    function showKeypad() {
-      header.textContent = "Verkäufernummer eingeben";
-      keypadContainer.classList.remove('hidden');
+    let currentInput = "";
+    let loginStep = 0;
+
+    const steps = [
+      "Verkäufernummer eingeben",
+      "PIN eingeben",
+      "Liniennummer eingeben",
+      "Route eingeben"
+    ];
+
+    function startLogin() {
+      startScreen.classList.add('hidden');
+      mainScreen.classList.remove('hidden');
+      loginStep = 0;
+      updateHeader();
+    }
+
+    function updateHeader() {
+      inputDisplay.textContent = "";
+      currentInput = "";
+      document.title = steps[loginStep];
     }
 
     function inputDigit(digit) {
@@ -120,12 +138,18 @@
 
     function clearInput() {
       currentInput = "";
-      inputDisplay.textContent = currentInput;
+      inputDisplay.textContent = "";
     }
 
     function submitInput() {
-      alert("Eingegeben: " + currentInput);
-      clearInput();
+      if (loginStep < steps.length - 1) {
+        loginStep++;
+        updateHeader();
+      } else {
+        alert("Anmeldung abgeschlossen!");
+        startScreen.classList.remove('hidden');
+        mainScreen.classList.add('hidden');
+      }
     }
   </script></body>
 </html>
