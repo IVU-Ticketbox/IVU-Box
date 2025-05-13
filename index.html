@@ -10,11 +10,18 @@
       background-color: #001f3f;
       color: white;
     }
+    .header-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid #ccc;
+    }
     .center-header {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 60vh;
+      height: 40vh;
       font-size: 1.5rem;
     }
     .bottom-nav {
@@ -23,7 +30,6 @@
       width: 100%;
       display: flex;
       background-color: #001730;
-      border-top: 1px solid white;
     }
     .bottom-nav button {
       flex: 1;
@@ -31,6 +37,19 @@
       border: none;
       font-size: 1rem;
       color: white;
+      position: relative;
+    }
+    .bottom-nav button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background-color: white;
+    }
+    .bottom-nav button:last-child::after {
+      display: none;
     }
     .bottom-nav #btn-itcs {
       background-color: #3399ff;
@@ -42,7 +61,7 @@
       background-color: gray;
     }
     .screen {
-      padding: 2rem;
+      padding: 1rem 2rem 5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -61,7 +80,8 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
-      margin-top: 1rem;
+      margin-top: auto;
+      margin-bottom: 10px;
     }
     .keypad button {
       background-color: #3399ff;
@@ -83,7 +103,12 @@
   </style>
 </head>
 <body>
-  <div id="start-screen" class="center-header">Bitte ITCS anmelden</div>  <div id="main-screen" class="screen hidden">
+  <div class="header-info">
+    <div id="header-linie">Linie: –</div>
+    <div id="header-ziel">Ziel: –</div>
+    <div id="header-zeit"></div>
+  </div>  <div id="start-screen" class="center-header">Bitte ITCS anmelden</div>  <div id="main-screen" class="screen hidden">
+    <div id="step-label" style="margin-bottom: 1rem; font-size: 1.2rem;">Verkäufernummer eingeben</div>
     <div id="input-display" class="input-display"></div>
     <div class="keypad">
       <button onclick="inputDigit('1')">1</button>
@@ -107,6 +132,8 @@
     const startScreen = document.getElementById('start-screen');
     const mainScreen = document.getElementById('main-screen');
     const inputDisplay = document.getElementById('input-display');
+    const stepLabel = document.getElementById('step-label');
+    const headerZeit = document.getElementById('header-zeit');
 
     let currentInput = "";
     let loginStep = 0;
@@ -118,6 +145,15 @@
       "Route eingeben"
     ];
 
+    function updateTime() {
+      const now = new Date();
+      const date = now.toLocaleDateString();
+      const time = now.toLocaleTimeString();
+      headerZeit.textContent = `${date} ${time}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+
     function startLogin() {
       startScreen.classList.add('hidden');
       mainScreen.classList.remove('hidden');
@@ -128,7 +164,7 @@
     function updateHeader() {
       inputDisplay.textContent = "";
       currentInput = "";
-      document.title = steps[loginStep];
+      stepLabel.textContent = steps[loginStep];
     }
 
     function inputDigit(digit) {
@@ -147,8 +183,8 @@
         updateHeader();
       } else {
         alert("Anmeldung abgeschlossen!");
-        startScreen.classList.remove('hidden');
         mainScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
       }
     }
   </script></body>
