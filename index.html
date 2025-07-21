@@ -1,168 +1,313 @@
-<!DOCTYPE html><html lang="de">
+<!DOCTYPE html>
+<html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ITCS Simulation - Linie 13</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ticketbox Webapp</title>
   <style>
-    body {
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: sans-serif;
-      background-color: #0d1a2b;
-      color: white;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background: #111;
+      color: #fff;
+    }
+    .app {
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       height: 100vh;
+      padding: 10px;
     }
-    .main {
-      flex: 1;
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 10px;
+      font-size: 1rem;
+    }
+    .header .clock {
+      text-align: right;
+    }
+    .header .clock div {
+      line-height: 1.2;
+    }
+    .screen {
+      text-align: center;
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
-      padding: 10px;
+      gap: 20px;
     }
-    .message {
-      margin-bottom: 20px;
-      font-size: 1.5em;
-      text-align: center;
+    h2 {
+      font-size: 1.5rem;
     }
-    .num-pad {
+    .numpad {
       display: grid;
-      grid-template-columns: repeat(3, 80px);
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-bottom: 20px;
+      max-width: 300px;
+      margin: 0 auto;
     }
-    .num-pad button {
-      background-color: #1976d2;
-      color: white;
-      font-size: 1.2em;
+    .numpad button {
       padding: 20px;
-      border: none;
-      border-radius: 5px;
-    }
-    .bottom-nav {
-      display: flex;
-      justify-content: space-around;
-      background-color: #1e1e1e;
-      padding: 10px 0;
-      border-top: 1px solid white;
-    }
-    .bottom-nav button {
-      flex: 1;
-      padding: 15px;
-      background: none;
+      font-size: 1.5rem;
+      background: #007bff;
       color: white;
       border: none;
-      font-size: 1em;
+      border-radius: 8px;
     }
-    .bottom-nav button.active {
-      background-color: #1976d2;
-    }
-    .top-info {
-      position: absolute;
-      top: 5px;
-      left: 10px;
-      right: 10px;
+    .footer {
       display: flex;
-      justify-content: space-between;
-      font-size: 0.9em;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 0;
+      background: #222;
     }
-    .line-indicator {
-      margin-top: 20px;
-      font-size: 1.3em;
-      border-top: 1px solid white;
-      padding-top: 10px;
+    .footer button {
+      background: #007bff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+    }
+    .divider {
+      height: 30px;
+      width: 2px;
+      background: white;
+    }
+    .haltestellen-anzeige {
+      text-align: left;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .haltestellen-anzeige li {
+      list-style: none;
+      padding: 5px 0;
+    }
+    .aktuell {
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    .vorherig {
+      color: gray;
+      font-size: 0.9rem;
+    }
+    .klein {
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
-  <div class="top-info">
-    <div id="line">13 Olbersdorfer See, Haus am See</div>
-    <div id="datetime"></div>
+  <div class="app" id="app">
+    <!-- Alles wird per JavaScript reingerendert -->
   </div>
-  <div class="main">
-    <div id="status" class="message">Bitte ITCS anmelden</div>
-    <div class="num-pad" id="numPad"></div>
-    <div class="line-indicator" id="lineIndicator"></div>
-  </div>
-  <div class="bottom-nav">
-    <button class="active" id="btnITCS">ITCS</button>
-    <button id="btnVerkauf">Verkauf</button>
-    <button id="btnWerkstatt">Werkstattfahrt</button>
-  </div>  <script>
-    let inputBuffer = "";
-    let step = 0;
 
-    const status = document.getElementById('status');
-    const numPad = document.getElementById('numPad');
-    const lineInfo = document.getElementById('line');
-    const dateTime = document.getElementById('datetime');
-    const lineIndicator = document.getElementById('lineIndicator');
+  <script>
+    const app = document.getElementById("app");
 
-    const steps = ["Verkäufernummer eingeben", "PIN eingeben", "Liniennummer eingeben", "Route eingeben"];
+    let screen = "welcome";
+    let currentStep = "verkaeufer";
+    let input = "";
+    let verkaeufer = "";
+    let pin = "";
+    let umlauf = "";
+    let linie = "";
+    let route = "";
+    let ziel = "";
+    let currentStopIndex = 0;
 
-    function showNumPad() {
-      numPad.innerHTML = '';
-      for (let i = 1; i <= 9; i++) addNumButton(i);
-      addNumButton(0);
-      addControlButton("✓", onConfirm);
-      addControlButton("X", onClear);
-    }
-
-    function addNumButton(num) {
-      const btn = document.createElement('button');
-      btn.textContent = num;
-      btn.onclick = () => {
-        inputBuffer += num;
-        updateLine();
-      };
-      numPad.appendChild(btn);
-    }
-
-    function addControlButton(text, handler) {
-      const btn = document.createElement('button');
-      btn.textContent = text;
-      btn.onclick = handler;
-      numPad.appendChild(btn);
-    }
-
-    function updateLine() {
-      lineIndicator.textContent = `Eingabe: ${inputBuffer}`;
-    }
-
-    function onConfirm() {
-      if (!inputBuffer) return;
-      if (step < steps.length - 1) {
-        step++;
-        inputBuffer = "";
-        status.textContent = steps[step];
-        updateLine();
-      } else {
-        status.textContent = "Anmeldung abgeschlossen.";
-        lineIndicator.textContent = "13 Olbersdorfer See, Haus am See";
+    const daten = {
+      "13": {
+        "1": {
+          ziel: "Olbersdorfer See, Haus am See",
+          haltestellen: [
+            "Zittau, Vorstadt Bahnhof",
+            "Olbersdorf, Bärschstraße",
+            "Olbersdorfer See, Pflegeheim",
+            "Olbersdorfer See, Haus am See"
+          ]
+        }
       }
-    }
-
-    function onClear() {
-      inputBuffer = "";
-      updateLine();
-    }
-
-    document.getElementById('btnITCS').onclick = () => {
-      step = 0;
-      inputBuffer = "";
-      status.textContent = steps[step];
-      showNumPad();
-      updateLine();
     };
 
-    function updateTime() {
+    function getDateTime() {
       const now = new Date();
-      const date = now.toLocaleDateString();
       const time = now.toLocaleTimeString();
-      dateTime.textContent = `${date} ${time}`;
+      const date = now.toLocaleDateString();
+      return { time, date };
     }
-    setInterval(updateTime, 1000);
-    updateTime();
-  </script></body>
+
+    function render() {
+      const { time, date } = getDateTime();
+
+      let content = "";
+
+      if (screen === "welcome") {
+        content = `
+          <div class="header">
+            <div></div>
+            <div class="clock"><div>${time}</div><div>${date}</div></div>
+          </div>
+          <div class="screen">
+            <h2>Bitte ITCS anmelden</h2>
+          </div>
+        `;
+      }
+
+      if (screen === "login") {
+        let prompt = "";
+        if (currentStep === "verkaeufer") prompt = "Verkäufernummer eingeben";
+        if (currentStep === "pin") prompt = "PIN eingeben";
+        if (currentStep === "angemeldet") prompt = "Anmeldung erfolgreich";
+
+        content = `
+          <div class="header">
+            <div></div>
+            <div class="clock"><div>${time}</div><div>${date}</div></div>
+          </div>
+          <div class="screen">
+            <h2>${prompt}</h2>
+            ${currentStep !== "angemeldet" ? renderNumPad() : ""}
+          </div>
+        `;
+      }
+
+      if (screen === "itcs") {
+        let prompt = "";
+        if (currentStep === "umlauf") prompt = "Umlaufnummer eingeben";
+        if (currentStep === "linie") prompt = "Linie eingeben";
+        if (currentStep === "route") prompt = "Route eingeben";
+
+        content = `
+          <div class="header">
+            <div>${linie ? linie + ", " + ziel : "IBIS-BETRIEB"}</div>
+            <div class="clock"><div>${time}</div><div>${date}</div></div>
+          </div>
+          <div class="screen">
+            <h2>${prompt}</h2>
+            ${renderNumPad()}
+          </div>
+        `;
+      }
+
+      if (screen === "main") {
+        const stops = daten[linie]?.[route]?.haltestellen || [];
+        ziel = daten[linie]?.[route]?.ziel || "IBIS-BETRIEB";
+
+        let haltestellenHTML = "<ul class='haltestellen-anzeige'>";
+        if (currentStopIndex > 0)
+          haltestellenHTML += `<li class="vorherig">${stops[currentStopIndex - 1]}</li>`;
+
+        haltestellenHTML += `<li class="aktuell">${stops[currentStopIndex]}</li>`;
+
+        for (let i = 1; i <= 5; i++) {
+          const next = stops[currentStopIndex + i];
+          if (next) haltestellenHTML += `<li class="klein">${next}</li>`;
+        }
+        haltestellenHTML += "</ul>";
+
+        content = `
+          <div class="header">
+            <div>${linie ? linie + ", " + ziel : "IBIS-BETRIEB"}</div>
+            <div class="clock"><div>${time}</div><div>${date}</div></div>
+          </div>
+          <div class="screen">
+            ${haltestellenHTML}
+          </div>
+        `;
+      }
+
+      app.innerHTML = content + renderFooter();
+    }
+
+    function renderNumPad() {
+      return `
+        <div class="numpad">
+          ${[1,2,3,4,5,6,7,8,9,0].map(n => `<button onclick="num('${n}')">${n}</button>`).join("")}
+          <button onclick="ok()">✓</button>
+          <button onclick="clr()">X</button>
+        </div>
+      `;
+    }
+
+    function renderFooter() {
+      return `
+        <div class="footer">
+          <button onclick="startLogin()">Verkauf</button>
+          <div class="divider"></div>
+          <button onclick="startITCS()">ITCS</button>
+          <div class="divider"></div>
+          <button disabled>Werkstattfahrt</button>
+        </div>
+      `;
+    }
+
+    function startLogin() {
+      screen = "login";
+      currentStep = "verkaeufer";
+      input = "";
+      render();
+    }
+
+    function startITCS() {
+      screen = "itcs";
+      currentStep = "umlauf";
+      input = "";
+      render();
+    }
+
+    function num(n) {
+      input += n;
+      render();
+    }
+
+    function clr() {
+      input = "";
+      render();
+    }
+
+    function ok() {
+      if (screen === "login") {
+        if (currentStep === "verkaeufer") {
+          verkaeufer = input;
+          input = "";
+          currentStep = "pin";
+        } else if (currentStep === "pin") {
+          pin = input;
+          input = "";
+          currentStep = "angemeldet";
+          setTimeout(() => {
+            screen = "main";
+            render();
+          }, 1000);
+        }
+      } else if (screen === "itcs") {
+        if (currentStep === "umlauf") {
+          umlauf = input;
+          input = "";
+          currentStep = umlauf === "00000" ? "linie" : "main";
+        } else if (currentStep === "linie") {
+          linie = input;
+          input = "";
+          currentStep = linie === "0" ? "route" : "main";
+        } else if (currentStep === "route") {
+          route = input;
+          input = "";
+          currentStep = "main";
+        }
+      }
+      render();
+    }
+
+    render();
+  </script>
+</body>
 </html>
